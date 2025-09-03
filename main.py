@@ -21,7 +21,7 @@ async def chart(data: Item):
     return chart_fn(**data.dict())
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000,reload=True)
+    uvicorn.run("main:app",reload=True)
 
 # 可选：允许跨域（前端访问用）
 app.add_middleware(
