@@ -10,7 +10,14 @@ class Item(BaseModel):
     model:str|None = "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B"
 
 app = FastAPI()
-
+# 可选：允许跨域（前端访问用）
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 或指定你的前端域名
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -21,13 +28,8 @@ async def chart(data: Item):
     return chart_fn(**data.dict())
 
 if __name__ == "__main__":
-    uvicorn.run("main:app")
 
-# 可选：允许跨域（前端访问用）
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # 或指定你的前端域名
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
+
+    uvicorn.run(app, host="0.0.0.0")
+
