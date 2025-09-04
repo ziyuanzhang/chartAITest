@@ -22,14 +22,11 @@ app.add_middleware(
 async def root():
     return {"message": "Hello World"}
 
-@app.post("/chart")
+@app.post("/api/chart")
 async def chart(data: Item):
     print(data.content)
     return chart_fn(**data.dict())
 
 if __name__ == "__main__":
-
-
-
     uvicorn.run(app, host="0.0.0.0")
 
