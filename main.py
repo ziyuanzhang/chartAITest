@@ -1,7 +1,4 @@
 import asyncio
-from http.client import responses
-
-import uvicorn
 from fastapi import FastAPI,Request,HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -9,8 +6,6 @@ from typing import Dict
 import uuid
 import json
 import time
-
-from websockets import connect
 
 app = FastAPI()
 
@@ -82,7 +77,7 @@ async def start_chat_stream(stream_id: str):
                     if chunk.choice[0].finish_reason =="stop":
                         break
                     content =chunk.choice[0].delta.content
-                    if connect is not None:
+                    if content is not None:
                         full_response += content
                         # 发送SSE格式的数据
                         yield f"data:{json.dumps({'content':content})}\n\n"
@@ -96,6 +91,7 @@ async def start_chat_stream(stream_id: str):
                 session["status"]="error"
                 session["error"]=str(e)
                 yield f"data:{json.dumps({'error':str(e)})}\n\n"
+
         return  StreamingResponse(generate(),media_type="text/event-stream",headers={
             "Cache-Control":"no-cache",
             "Connection":"keep-alive",
@@ -137,4 +133,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app)
+    uvicorn.run(app,host="0.0.0.0")

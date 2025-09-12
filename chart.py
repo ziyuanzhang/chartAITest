@@ -1,7 +1,7 @@
 import requests
 
 
-async def chart_fn(api_key,content,model):
+async def chart_fn(content,model="deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",api_key="sk-iahsrftpbmogrqjxduqkegicuikzawajsddbcxhexvivkrsy"):
   headers = {"Content-Type": "application/json",
              "Authorization": f"Bearer {api_key}"}
 
