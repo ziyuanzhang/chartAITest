@@ -6,6 +6,8 @@ from typing import Dict
 import uuid
 import json
 import time
+from chat_siliconflow import chat_siliconflow_fn
+from chat_openai import chat_openai_fn
 
 app = FastAPI()
 
@@ -40,14 +42,18 @@ async def start_chat_session(request: Request):
         await cleanup_old_sessions()
 
         return {
-            "stream_id":stream_id,
-            "status":"session_created"
+            "code":"success",
+            "message":"",
+            "data":{
+                "stream_id":stream_id,
+                "status":"session_created"
+            }
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start request: {str(e)}")
 
-@app.post("/api/chat/stream/{stream_id}")
+@app.get("/api/chat/stream/{stream_id}")
 async def start_chat_stream(stream_id: str):
     """
     通过GET请求连接到此会话的流式响应
@@ -69,7 +75,7 @@ async def start_chat_stream(stream_id: str):
     session["status"]="streaming"
     try:
         # 调用OpenAI API
-        response = {}
+        response = await chat_openai_fn(session["message"])
         async def generate():
             full_response=""
             try:
@@ -90,7 +96,7 @@ async def start_chat_stream(stream_id: str):
             except Exception as e:
                 session["status"]="error"
                 session["error"]=str(e)
-                yield f"data:{json.dumps({'error':str(e)})}\n\n"
+                yield f"data:{json.dumps({'error-generate':str(e)})}\n\n"
 
         return  StreamingResponse(generate(),media_type="text/event-stream",headers={
             "Cache-Control":"no-cache",
@@ -98,9 +104,10 @@ async def start_chat_stream(stream_id: str):
         })
     except Exception as e:
         session["status"]="error"
-        session["error"] = str(e)
+        error_message = str(e)  # 关键：先获取错误消息
+        session["error"] = error_message
         async def error_response():
-            yield f"data:{json.dumps({'error':f'OpenAI API error: {str(e)}'})}\n\n"
+            yield f"data: {json.dumps({'error': f'OpenAI API error: {error_message}'})}\n\n"
         return StreamingResponse(error_response(),media_type="text/event-stream")
 
 async def cleanup_old_sessions():
@@ -133,4 +140,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app,host="0.0.0.0")
+    uvicorn.run(app)

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from chart import chart_fn
+from chat_second import chat_fn
 import uvicorn
 
 class Item(BaseModel):
