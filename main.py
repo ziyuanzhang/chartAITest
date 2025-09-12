@@ -7,6 +7,7 @@ import uuid
 import json
 import time
 from chat_siliconflow import chat_siliconflow_fn
+from chat_siliconflow2 import chat_siliconflow2_fn
 from chat_openai import chat_openai_fn
 
 app = FastAPI()
@@ -75,19 +76,29 @@ async def start_chat_stream(stream_id: str):
     session["status"]="streaming"
     try:
         # 调用OpenAI API
-        response = await chat_openai_fn(session["message"])
+        response = await chat_siliconflow_fn(se ssion["message"])
         async def generate():
             full_response=""
             try:
                 for chunk in response:
-                    if chunk.choice[0].finish_reason =="stop":
-                        break
-                    content =chunk.choice[0].delta.content
-                    if content is not None:
+                    # if chunk.choice[0].finish_reason =="stop":
+                    #     break
+                    # content =chunk.choice[0].delta.content
+                    # if content is not None:
+                    #     full_response += content
+                    #     # 发送SSE格式的数据
+                    #     yield f"data:{json.dumps({'content':content})}\n\n"
+                    #     await asyncio.sleep(0.01) # 控制输出速度
+                    # 检查是否结束
+                    if chunk.choices and chunk.choices[0].finish_reason:
+                        if chunk.choices[0].finish_reason == "stop":
+                            break
+
+                    if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
+                        content = chunk.choices[0].delta.content
                         full_response += content
-                        # 发送SSE格式的数据
-                        yield f"data:{json.dumps({'content':content})}\n\n"
-                        await asyncio.sleep(0.01) # 控制输出速度
+                        yield f"data: {json.dumps({'content': content})}\n\n"
+                        await asyncio.sleep(0.01)
                 # 标记会话完成
                 session["status"]="completed"
                 session["message"] = full_response

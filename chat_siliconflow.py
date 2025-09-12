@@ -1,9 +1,10 @@
 import requests
 
 import os
+SILICONFLOW_API_KEY = os.getenv("SILICONFLOW_API_KEY")
 
 
-async def chat_siliconflow_fn(content,model="deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",api_key=os.getenv("SILICONFLOW_API_KEY")):
+async def chat_siliconflow_fn(content,model="deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",api_key=SILICONFLOW_API_KEY):
       headers = {"Content-Type": "application/json",
                  "Authorization": f"Bearer {api_key}"}
 
