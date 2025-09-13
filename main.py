@@ -76,7 +76,7 @@ async def start_chat_stream(stream_id: str):
     session["status"]="streaming"
     try:
         # 调用OpenAI API
-        response = await chat_siliconflow_fn(se ssion["message"])
+        response = await chat_siliconflow_fn(session["message"])
         async def generate():
             full_response=""
             try:
